@@ -1,0 +1,50 @@
+cabal-version:       2.4
+
+name:                hs-blog
+version:             0.1.0.0
+synopsis:            blog generator
+description:         blog
+homepage:            google.com
+bug-reports:         google.com
+license:             BSD-3-Clause
+license-file:        LICENSE.txt
+author:              fred 
+maintainer:          fred@fred.com
+category:            Html
+extra-doc-files:
+  README.md
+
+common common-settings
+  default-language: Haskell2010
+  ghc-options:
+    -Wall
+
+library
+  import: common-settings
+  hs-source-dirs: src
+  build-depends:
+      base
+    , directory
+  exposed-modules:
+    HsBlog
+      HsBlog.Convert
+      HsBlog.Html
+        HsBlog.Html.Internal
+      HsBlog.Markup
+      HsBlog.Index
+  -- other-modules:
+
+executable hs-blog-gen
+  import: common-settings
+  hs-source-dirs: app
+  main-is: Main.hs
+  other-modules:
+    Parser
+  build-depends:
+      base
+    , optparse-applicative
+    , hs-blog
+    , directory
+  ghc-options:
+    -O
+

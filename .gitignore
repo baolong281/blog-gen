@@ -1,4 +1,5 @@
-main
-main.hi
-main.o
-out.html
+dist
+dist-newstyle
+.stack-work
+*.html
+example/
