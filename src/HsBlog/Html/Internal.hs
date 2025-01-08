@@ -30,10 +30,10 @@ empty_ :: Structure
 empty_ = Structure ""
 
 p_ :: Content -> Structure
-p_ = Structure . el "p" . escape . getContentString
+p_ = Structure . el "p" . getContentString
 
 h_ :: Natural -> Content -> Structure
-h_ n = Structure . el ("h" <> show n) . escape . getContentString
+h_ n = Structure . el ("h" <> show n) . getContentString
 
 ul_ :: [Structure] -> Structure
 ul_ =

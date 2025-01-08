@@ -25,13 +25,15 @@ library
   build-depends:
       base
     , directory
+    , filepath
   exposed-modules:
     HsBlog
       HsBlog.Convert
       HsBlog.Html
         HsBlog.Html.Internal
       HsBlog.Markup
-      HsBlog.Index
+      HsBlog.Directory
+      HsBlog.Utils
   -- other-modules:
 
 executable hs-blog-gen
