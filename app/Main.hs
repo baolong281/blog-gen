@@ -13,8 +13,8 @@ main :: IO ()
 main = do
     options <- parseOptions
     case options of
-        ConvertDir input output _ ->
-            Directory.convertDirectory input output
+        ConvertDir input output _ env ->
+            Directory.convertDirectory env input output
         ConvertSingle input output replace ->
             let
                 withInputHandle :: (String -> Handle -> IO a) -> IO a

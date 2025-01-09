@@ -1,5 +1,3 @@
-{-# LANGUAGE DataKinds #-}
-
 module Parser (
     Options (..),
     SingleInput (..),
@@ -10,6 +8,7 @@ module Parser (
 where
 
 import Data.Maybe (fromMaybe)
+import HsBlog.Env (Env (Env, eBlogName, eStylesheet), defaultEnv)
 import Options.Applicative
 
 parseOptions :: IO Options
@@ -20,7 +19,7 @@ parseOptions = execParser opts
 
 data Options
     = ConvertSingle SingleInput SingleOutput Replace
-    | ConvertDir FilePath FilePath Replace
+    | ConvertDir FilePath FilePath Replace Env
 
 data SingleInput
     = Stdin
@@ -107,7 +106,7 @@ outp =
 
 pConvertDir :: Parser Options
 pConvertDir =
-    ConvertDir <$> pInputDir <*> pOutputDir <*> pReplace
+    ConvertDir <$> pInputDir <*> pOutputDir <*> pReplace <*> pEnv
 
 pInputDir :: Parser FilePath
 pInputDir =
@@ -125,6 +124,32 @@ pOutputDir =
             <> short 'o'
             <> metavar "DIRECTORY"
             <> help "Output directory"
+        )
+
+pEnv :: Parser Env
+pEnv =
+    Env <$> pBlogName <*> pStylesheet
+
+pBlogName :: Parser String
+pBlogName =
+    strOption
+        ( long "name"
+            <> short 'n'
+            <> metavar "STRING"
+            <> help "Blog name"
+            <> value (eBlogName defaultEnv)
+            <> showDefault
+        )
+
+pStylesheet :: Parser FilePath
+pStylesheet =
+    strOption
+        ( long "style"
+            <> short 'S'
+            <> metavar "FILE"
+            <> help "Stylesheet filename"
+            <> value (eStylesheet defaultEnv)
+            <> showDefault
         )
 
 -------------------------------------------------------------------------------

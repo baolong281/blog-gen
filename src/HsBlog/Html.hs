@@ -15,6 +15,10 @@ module HsBlog.Html (
     b_,
     i_,
     render,
+    Head,
+    title_,
+    stylesheet_,
+    meta_,
 )
 where
 

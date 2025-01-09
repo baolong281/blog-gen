@@ -26,6 +26,7 @@ library
       base
     , directory
     , filepath
+    , mtl
   exposed-modules:
     HsBlog
       HsBlog.Convert
@@ -34,6 +35,7 @@ library
       HsBlog.Markup
       HsBlog.Directory
       HsBlog.Utils
+      HsBlog.Env
   -- other-modules:
 
 executable hs-blog-gen

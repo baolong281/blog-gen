@@ -7,8 +7,10 @@ import qualified HsBlog.Markup as Markup
 import qualified HsBlog.Utils as Utils
 
 import Control.Monad (void, when)
+import Control.Monad.Reader
 import Data.List (partition)
 import Data.Traversable (for)
+import HsBlog.Env
 
 import Control.Exception (SomeException (..), catch, displayException)
 import System.Directory (
@@ -34,12 +36,12 @@ data DirContents
     , dcFilesToCopy :: [FilePath]
     }
 
-convertDirectory :: FilePath -> FilePath -> IO ()
-convertDirectory inputDir outputDir = do
+convertDirectory :: Env -> FilePath -> FilePath -> IO ()
+convertDirectory env inputDir outputDir = do
     DirContents filesToProcess filesToCopy <- getDirFilesAndContent inputDir
     createOutputDirectoryOrExit outputDir
     let
-        outputHtmls = txtsToRenderedHtml filesToProcess
+        outputHtmls = runReader (txtsToRenderedHtml filesToProcess) env
     copyFiles outputDir filesToCopy
     writeFiles outputDir outputHtmls
     putStrLn "Done."
@@ -117,28 +119,32 @@ whenIO bool action = do
     condition <- bool
     when condition action
 
-buildIndex :: [(FilePath, Markup.Document)] -> Html.Html
-buildIndex files =
-    Html.html_
-        "Index Page"
-        ( Html.h_ 2 (Html.txt_ "Entries")
-            <> createPathList files
+buildIndex :: [(FilePath, Markup.Document)] -> Reader Env Html.Html
+buildIndex files = do
+    env <- ask
+    pure
+        ( Html.html_
+            (headFromEnv env "Index Page")
+            ( Html.h_ 2 (Html.txt_ (eBlogName env <> " - " <> "Entries"))
+                <> createPathList files
+            )
         )
-txtsToRenderedHtml :: [(FilePath, String)] -> [(FilePath, String)]
-txtsToRenderedHtml files =
-    let
-        outputFiles = map toOutputMarkupFile files
-        index = ("index.html", buildIndex outputFiles)
-     in
-        map (fmap Html.render) (index : map convertFile outputFiles)
+
+convertFile :: (FilePath, Markup.Document) -> Reader Env (FilePath, Html.Html)
+convertFile (path, document) = do
+    env <- ask
+    pure (path, convert env path document)
+
+txtsToRenderedHtml :: [(FilePath, String)] -> Reader Env [(FilePath, String)]
+txtsToRenderedHtml files = do
+    let outputFiles = map toOutputMarkupFile files
+    index <- (,) "index.html" <$> buildIndex outputFiles
+    processed <- traverse convertFile outputFiles
+    pure $ map (fmap Html.render) (index : processed)
 
 toOutputMarkupFile :: (FilePath, String) -> (FilePath, Markup.Document)
 toOutputMarkupFile (file, content) =
     (takeBaseName file <.> ".html", Markup.parse content)
-
-convertFile :: (FilePath, Markup.Document) -> (FilePath, Html.Html)
-convertFile (path, document) =
-    (path, convert path document)
 
 createPathList :: [(FilePath, Markup.Document)] -> Html.Structure
 createPathList files =
